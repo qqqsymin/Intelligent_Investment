@@ -5,7 +5,10 @@ export async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   })
-  if (!response.ok) throw new Error(`API ${response.status}: ${response.statusText}`)
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.detail || `API ${response.status}: ${response.statusText}`)
+  }
   return response.json()
 }
 
@@ -14,4 +17,8 @@ export const api = {
   config: () => request('/config'),
   runBacktest: (payload) => request('/backtest/run', { method: 'POST', body: JSON.stringify(payload) }),
   latest: () => request('/backtest/latest'),
+  metrics: () => request('/backtest/metrics'),
+  equity: () => request('/backtest/equity'),
+  trades: () => request('/backtest/trades'),
+  orders: () => request('/backtest/orders'),
 }
